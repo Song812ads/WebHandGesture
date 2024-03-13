@@ -1,70 +1,54 @@
-# Getting Started with Create React App
+## WEB APP HAND GESTURE WITH MEDIAPIPE AND TFJS
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+<b>1.  Overview:</b>
 
-In the project directory, you can run:
+This project is a small branch within another project "Hand gesture to control 6LOWPAN".
 
-### `npm start`
+This is a general flowchart of the large project
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+![alt text](image-3.png)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+This repository is about how Client use hand gesture to communicate with Server and connect to MQTT Server.
 
-### `npm test`
+<b> 2. Hand Gesture</b>
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The model is based on MediaPipe api which provides way to catch if the hands is exist on frame and extract the position of nodes which will be use to predict after CNN model.
+![alt text](image-1.png)
 
-### `npm run build`
+The model I use to predict base on those nodes is based on this repository 
+https://github.com/kinivi/hand-gesture-recognition-mediapipe
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+After training model, I used tensorflowjs to convert the model weight and parameter in .h5 file to .json file, and then loaded it to my React app as well the cdn of mediapipe to define nodes.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Otherwise, I used some api of React like useRef and WebcamRef to sendFrame when if something change on the frame, used canvas to draw the landmark and box of hand and basic html and react bootstrap to decorate the page.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Moreover, when I useRef and Camera-utils the camera will have a Callback onFrame when camera frame is ready, I can not just slow down the onFrame process because it will decrease the experiment of user. So that, I will have some algorithms to make sure that if the predict is same after 20 predict then it will post the request to backend and draw some canvas, or when there is a change or no hands on camera it will reset the count of 20.
 
-### `npm run eject`
+<b>3. MQTT - MQTTSN</b>
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+MQTT Server is host on Docker containers. I have created the docker compose.yml to run docker containers file and MQTT_client.py in this repository
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+To communicate with 6LowPAN you must use MQTT-SN and RSMB
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+<b>4. ContikiOS </b>
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+I have writed bash script and Cooja simulate in this repository. 
 
-## Learn More
+<b>5. Authorization-Authentication</b>
+In front end react, I will have some authorization request which I will send check user request to my backend if the client try to access Demo/Dashboard topic.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+![alt text](image-6.png)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+When the user is login which user/pass is song/song, the access token will send from server. The access token in real world may have some algorithms to make sure the client can't easily jwt encode it. Make sure the request is send in jwt type so that packet receive app like wideshark may not know what is real data 
 
-### Code Splitting
+![alt text](image-7.png)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+After that, when access resource from server, server can track the access token, we may have something like time-access to handle the token in backend to make sure the token is not get from some other request.
 
-### Analyzing the Bundle Size
+<b>6. Demo </b>
+Web APP Hand Gesture:
+![alt text](image-5.png)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Web App Hand Gesture with Cooja:
+![alt text](image-4.png)
