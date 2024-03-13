@@ -73,6 +73,10 @@ My backend is host on Pythoniseverywhere
 
 Have fun with my project, I will train more and update the type of my train later. Make sure your camera is ready and user/pass in demo topic is demo/demo.
 
+Here is my link project:
+
+https://song812ads.github.io/DemoWeb
+
 Type of my hand train:
 
 ![alt text](anh/image-11.png)
