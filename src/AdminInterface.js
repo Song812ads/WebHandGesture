@@ -34,11 +34,20 @@ const AdminInterface = () => {
     const predict_value = 20
     
     const labelMap = {
-      1:{name:"Led", color:'red'},
-      2:{name:"Temp", color:'yellow'},
-      3:{name:"Humid", color:'lime'},
-      4:{name:"Reset", color:'blue'},
+      1:{name:"Reset", color:'red'},
+      2:{name:"Led", color:'yellow'},
+      3:{name:"Off all", color:'lime'},
+      4:{name:"1 On", color:'blue'},
+      5:{name:"2 On", color:'blue'},
+      6:{name:"1 and 2 On", color:'blue'},
+      7:{name:"1 Off", color:'blue'},
+      8:{name:"2 Off", color:'blue'},
+      9:{name:"Get 1 data", color:'blue'},
+      10:{name:"Get 2 data", color:'blue'},
+      11:{name:"Nothing", color:'blue'},
   }
+
+  const numberKey =   Object.keys(labelMap).length;
   
     const  drawBoundingBox = (landmarks, videoWidth,videoHeight) => {
       if (landmarks.length < 2) {
@@ -107,8 +116,8 @@ const AdminInterface = () => {
       return landmarkPoints;
     }
   
-    let resultIndex = 4
-    let prevState = 4
+    let resultIndex = numberKey
+    let prevState = numberKey
     const onResults = async (results)=>{
       const videoWidth = webcamRef.current.video.videoWidth;
       const videoHeight = webcamRef.current.video.videoHeight;
@@ -136,7 +145,7 @@ const AdminInterface = () => {
       canvasCtx.textAlign = "center";
       
   
-      if (prevState<=3 && prevState>=0 && count===predict_value){
+      if (prevState<=numberKey-1 && prevState>=0 && count===predict_value){
         const state = prevState +1 
         canvasCtx.fillText("Hand Gesture: " + labelMap[state].name ,100, 50, 200);
       }
@@ -162,8 +171,8 @@ const AdminInterface = () => {
       else {
         status = false
         count = 0
-        prevState = 4
-        resultIndex = 4
+        prevState = numberKey
+        resultIndex = numberKey
       }
   
       if (prevState!== resultIndex){
@@ -172,9 +181,8 @@ const AdminInterface = () => {
         prevState = resultIndex
     }
       else {
-        if (prevState!==4 && prevState !== -1 && status===false){
+        if (prevState!==numberKey && prevState !== -1 && status===false){
         count = count + 1
-        console.log(count)
         if (count === predict_value){
           status = true
             const request = {
@@ -251,7 +259,6 @@ const AdminInterface = () => {
           if (!modelHan){
             modelHan = await tf.loadLayersModel('http://localhost:8000/static/tfjsv2/model.json')
           }
-        console.log(webcamRef.current)
         if (((typeof webcamRef.current !== "undefined" && webcamRef.current !== null)) ){
     
           camera = new cam.Camera(webcamRef.current.video,{

@@ -66,8 +66,8 @@ class CRUD_DB():
     
 with app.app_context():
     db.create_all()
-    check = CRUD_DB(device_IP="192.197.192.12", sensor_type="Led", date = datetime.now(), value = 12.3)
-    check.add()
+    # check = CRUD_DB(device_IP="192.197.192.12", sensor_type="Led", date = datetime.now(), value = 12.3)
+    # check.add()
     # db.session.query
     
     # sensor = Sensor.query.get(sensor_type='Temperature')
@@ -77,8 +77,8 @@ with app.app_context():
     # Create new instance of Data and associate with Device and Sensor
     # data = Data(device = device,sensor =  sensor, time=datetime.now(), value=27.5)
     # db.session.add(data)
-    # data_to_update = Data.query.filter_by(id=1).first()
-    # data_to_update.value = 25.9
+    data_to_update = Data.query.filter_by(id=5).first()
+    data_to_update.value = 25.9
 
     # db.session.add(data)
     # db.session.commit()

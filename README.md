@@ -1,4 +1,4 @@
-    ## WEB APP HAND GESTURE WITH MEDIAPIPE AND TFJS
+## WEB APP HAND GESTURE WITH MEDIAPIPE AND TFJS
 
 
 <b>1.  Overview:</b>
@@ -33,13 +33,13 @@ I will host MQTT brokers on HiveMQ or local and host RSMB on localhost and use b
 
 <b>4. Authorization and Authentication </b>
 
-When user is not login, I will check by send a request to server for make sure there is login or not yet.The check is to make sure user get to some topic that need login must be authenticated.
+When user is not login, I will check by sending a request to server to make sure there is login or not yet.The check is to make sure user get to some topic that need authenticated has been login before.
 
 ![alt text](anh/image-8.png)
 
 When user is login, the access token will send back to client from server, frontend will store it on session storage. Now with different user, they can have different permission. 
 
-Other things is that to make sure the package cannot be read easily from outside I will JWT encode the request and decode in backend. In here, if neccessary, there will be some algorithms for user cannot easily JWT decode it 
+Other things is that to make sure the package cannot be read easily from outside I will JWT encode the request and decode in backend. In here, if neccessary, there will be some algorithms add to the code of JWT so that user cannot easily JWT decode it 
 
 ![alt text](anh/image-9.png)
 
@@ -49,9 +49,9 @@ This is for my hardware to receive, collect the temperature or humid in sensor. 
 
 ![alt text](anh/image-10.png)
 
-Because, it's not in this demo I will show some image about how it work
+Because, it's not in this demo I will show some image about how it works
 
-When there is no data yet in database 
+When there is 1 data in database 
 
 ![alt text](anh/image-14.png)
 
@@ -61,7 +61,7 @@ When they have same device, same sensor but different data or time:
 
 ![alt text](anh/image-16.png)
 
-So that when update, data there will be no conflict on other table and when erase device or sensor there will be different type of change. If lazy the data table will not erase, if cascade the data in data table will be erase.
+So that when update, data there will be no conflict on other table and when erase device or sensor there will be different type of change. If it is lazy type, the data in data table will not erase, if it is cascade type, data in data table will be erase.
 
 <b>6. Hosting app </b>
 

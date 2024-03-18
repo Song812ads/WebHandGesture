@@ -20,8 +20,6 @@ app.config['SECRET_KEY'] = 'nhungngay0em'
 cors = CORS(app, origins='*', X_Content_Type_Options= 'nosniff')
 login_manager = LoginManager()
 login_manager.init_app(app)
-context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-context.load_cert_chain('certificate.crt', 'privatekey.key')
 client = MQTTClient('user_web')
 
 def token_required(f):
@@ -135,4 +133,4 @@ def page_not_found(e):
     return redirect(url_for('serve'))
 
 if __name__ == "__main__":
-    app.run(ssl_context = context)
+    app.run('localhost',8000)
