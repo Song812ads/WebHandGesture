@@ -8,11 +8,11 @@ RECONNECT_RATE = 2
 MAX_RECONNECT_COUNT = 12
 MAX_RECONNECT_DELAY = 60
 
-def on_connect(client, userdata, flags, rc):
-    if rc==0:
-        print("connected OK Returned code=",rc)
-    else:
-        print("Bad connection Returned code=",rc)
+# def on_connect(client, userdata, flags, rc):
+#     if rc==0:
+#         # print("connected OK Returned code=",rc)
+#     else:
+#         # print("Bad connection Returned code=",rc)
 
 # def on_message(client, userdata, message):
 #     q.queue(message)
@@ -56,10 +56,11 @@ def wait_for(client,msgType,period=0.25):
 def init_clients(cname):
     # client= mqtt.Client(cname,False) #don't use clean session
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, cname, False)
-    client.tls_set(tls_version=mqtt.ssl.PROTOCOL_TLS)
-    client.username_pw_set(username="song123",password="Gnos91105712")
+    # client.tls_set(tls_version=mqtt.ssl.PROTOCOL_TLS)
+    # client.username_pw_set(username="song123",password="Gnos91105712")
+    client.username_pw_set(username="song", password="song")
     client.on_log=on_log
-    client.on_connect= on_connect        #attach function to callback
+    # client.on_connect= on_connect        #attach function to callback
     client.on_publish = on_publish
     client.on_disconnect = on_disconnect
 	#flags set
@@ -76,8 +77,8 @@ def init_clients(cname):
 class MQTTClient(mqtt.Client):
     def __init__(self, cname, queue = Queue()):
         self.client = init_clients(cname)
-        broker_address = 'b38e3e34323b4b0aa3b6fc3ab1e3b127.s1.eu.hivemq.cloud'
-        port = 8883
+        broker_address = 'localhost'
+        port = 1883
         try:
             self.client.connect(broker_address, port) #connect to broker
         except:

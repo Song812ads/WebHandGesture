@@ -1,26 +1,51 @@
 from flask import Flask,render_template,send_from_directory,send_file ,request, jsonify, redirect, url_for, make_response
 from flask_cors import CORS, cross_origin
-import os
 from mqtt_client import MQTTClient
-import uuid
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user
-from  werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
 import json
 from functools import wraps
-from OpenSSL import SSL
-import socket
-# import tensorflowjs as tfjs
-import ssl
+from database import  Device,Sensor, Data, CRUD_DB, app, db
+import tensorflow as tf
+import numpy as np
 
-app = Flask(__name__)
+# app = Flask(__name__)
 app.config['SECRET_KEY'] = 'nhungngay0em'
 cors = CORS(app, origins='*', X_Content_Type_Options= 'nosniff')
-login_manager = LoginManager()
-login_manager.init_app(app)
 client = MQTTClient('user_web')
+
+path = 'D:/contiki/doan/web_AI/hand-gesture/model'
+class KeyPointClassifier(object):
+    def __init__(
+        self,
+        model_path=path+'/keypoint_classifier/keypoint_classifier.tflite',
+        num_threads=1,
+    ):
+        self.interpreter = tf.lite.Interpreter(model_path=model_path,
+                                               num_threads=num_threads)
+
+        self.interpreter.allocate_tensors()
+        self.input_details = self.interpreter.get_input_details()
+        self.output_details = self.interpreter.get_output_details()
+
+    def __call__(
+        self,
+        landmark_list,
+    ):
+        input_details_tensor_index = self.input_details[0]['index']
+        self.interpreter.set_tensor(
+            input_details_tensor_index,
+            np.array([landmark_list], dtype=np.float32))
+        self.interpreter.invoke()
+
+        output_details_tensor_index = self.output_details[0]['index']
+
+        result = self.interpreter.get_tensor(output_details_tensor_index)
+
+        result_index = np.argmax(np.squeeze(result))
+
+        return result_index
+    
 
 def token_required(f):
     @wraps(f)
@@ -32,27 +57,18 @@ def token_required(f):
         # return 401 if token is not passed
         if not token:
             return jsonify({'message' : 'Token is missing !!'}), 401
-        # current_user = current_user
         try:
             data = jwt.decode(token, app.secret_key, ["HS256"])
             auth = data.get('username')
             if auth!='song' and auth!='demo':
+                print(auth)
                 return jsonify({'message' : 'Invalid Token !!'}), 401
         except:
             return jsonify({
                 'message' : 'Token is invalid !!'
             }), 401
-        # returns the current logged in users context to the routes
         return  f(auth,*args, **kwargs)
     return decorated
-
-class User(UserMixin):
-    def __init__(self, id):
-        self.id = id
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
 
 @app.route('/topic', methods = ['POST'])
 @token_required
@@ -76,14 +92,6 @@ def serve_binary_weights():
     weights_path = 'static/tfjsv2/group1-shard1of1.bin'
     return send_file(weights_path, mimetype='application/octet-stream')
 
-# @app.route('/', defaults={'path': ''})
-# @app.route('/<path:path>')  
-# def serve(path):
-#     if path != "" and os.path.exists(app.static_folder + '/' + path):
-#         return send_from_directory(app.static_folder, path)
-#     else:
-#         return send_from_directory(app.static_folder, 'index.html')
-
 @app.route('/log', methods = ['POST'])
 def login():
     if request.method == "POST":
@@ -102,7 +110,6 @@ def login():
             app.config['SECRET_KEY']
             ) 
             return make_response(jsonify({'token': token}),200)
-
         else:
             return make_response(
                 'Authorize fail',403,{'WWW-Authenticate' : 'Basic realm = "Login required" !!'}
@@ -114,23 +121,45 @@ def login():
         {'WWW-Authenticate' : 'Basic realm ="Wrong Password !!"'}
     )
 
-@app.route('/logout', methods = ['GET'])
-def logout():
-    logout_user()
-    return redirect(url_for('serve'))
-
 
 @app.route('/check_user',methods=['GET'])
 @token_required
 def checkUser(auth):
     if auth:
-        return jsonify('True'),200
+        return jsonify({'user':auth}),200
     else:
         return jsonify('False'),401
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return redirect(url_for('serve'))
 
-if __name__ == "__main__":
-    app.run('localhost',8000)
+@app.route('/fetch_graph', methods=['POST'])
+@token_required
+def fetch_graph(auth):
+    data = request.get_json()
+    device = data.get('device')
+    date = data.get('date')
+    # print(device)
+    data = CRUD_DB('123', device)
+    time_sensor = data.get_data_with_date(datetime.strptime(date, '%d-%m-%Y'))[0]
+    data_sensor = data.get_data_with_date(datetime.strptime(date, '%d-%m-%Y'))[1].astype(int).tolist()
+    time_sensei = [t.strftime('%H:%M') for t in time_sensor]
+    response = {
+        'time': time_sensei,
+        'data': data_sensor
+    }
+    return jsonify(response)
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.get_json()
+    data = data.get('data')
+    # print(data)
+    pred = model(data)
+    return json.dumps(pred, indent=2, default=int)
+
+
+if __name__ == "__main__": 
+    with app.app_context():
+        model = KeyPointClassifier()
+        db.create_all()
+        app.run('localhost',8000, debug=True)
+        

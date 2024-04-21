@@ -16,8 +16,7 @@ This repository is about how Client use hand gesture to communicate with Server 
 The model is based on MediaPipe api which provides way to catch if the hands is exist on frame and extract the position of nodes which will be use to predict after CNN model.
 ![alt text](anh/image-1.png)
 
-The model I use to predict base on those nodes is based on this repository 
-https://github.com/kinivi/hand-gesture-recognition-mediapipe
+The model I use is in model directory. It includes 2 file training model with Neural Network and Transformer. Otherwise, it include pdf about concept I use in this model.
 
 After training model, I used tensorflowjs to convert the model weight and parameter in .h5 file to .json file, and then loaded it to my React app as well the cdn of mediapipe to define nodes.
 

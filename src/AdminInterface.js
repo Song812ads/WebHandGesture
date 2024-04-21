@@ -13,38 +13,45 @@ import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
-import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import DefaultPage from "./component/DefaultPage";
 import LogInOut from "./component/LogInOut";
+import VideocamIcon from '@mui/icons-material/Videocam';
+import CoPresentIcon from '@mui/icons-material/CoPresent';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import { private_excludeVariablesFromRoot } from "@mui/material";
+import { layers } from "@tensorflow/tfjs";
+const { Attention } = layers;
+
+// const tf = require('@tensorflow/tfjs');
+
 
 const AdminInterface = () => {
     const navigate = useNavigate();
+    const [userCheck,setUser] = useState('')
     const { collapseSidebar } = useProSidebar();
     let modelHan
-    const host = "http://127.0.0.1:8000"
+    const host = "http://localhost:8000"
     const webcamRef = useRef(null);
     const canvasRef = useRef(null);
     let camera = null
     let canvasCtx = null
     let hands
     let count = 0
-    // let hans
     let status = false
     const predict_value = 20
     
     const labelMap = {
       1:{name:"Reset", color:'red'},
       2:{name:"Led", color:'yellow'},
-      3:{name:"Off all", color:'lime'},
-      4:{name:"1 On", color:'blue'},
-      5:{name:"2 On", color:'blue'},
-      6:{name:"1 and 2 On", color:'blue'},
-      7:{name:"1 Off", color:'blue'},
-      8:{name:"2 Off", color:'blue'},
-      9:{name:"Get 1 data", color:'blue'},
-      10:{name:"Get 2 data", color:'blue'},
-      11:{name:"Nothing", color:'blue'},
+      3:{name:"Sensor", color:'lime'},
+      4:{name:"Off all", color:'blue'},
+      5:{name:"1 On", color:'blue'},
+      6:{name:"2 On", color:'blue'},
+      7:{name:"1 and 2 On", color:'blue'},
+      8:{name:"1 Off", color:'blue'},
+      9:{name:"2 Off", color:'blue'},
+      10:{name:"Get 1 data", color:'blue'},
+      11:{name:"Get 2 data", color:'blue'},
   }
 
   const numberKey =   Object.keys(labelMap).length;
@@ -68,7 +75,7 @@ const AdminInterface = () => {
       canvasCtx.beginPath();
       canvasCtx.strokeStyle = 'red'
       canvasCtx.fillStyle = 'white'
-      canvasCtx.rect(minX*videoWidth, minY*videoHeight, (maxX - minX)*videoWidth*1.2, (maxY - minY)*videoHeight*1.2);
+      canvasCtx.rect(minX*videoWidth, minY*videoHeight, (maxX - minX)*videoWidth, (maxY - minY)*videoHeight);
       canvasCtx.stroke();
       canvasCtx.closePath()
     }
@@ -118,6 +125,10 @@ const AdminInterface = () => {
   
     let resultIndex = numberKey
     let prevState = numberKey
+    let prevPredict = 0
+    let recentPredict
+    let current = 0
+    let countReset = 0
     const onResults = async (results)=>{
       const videoWidth = webcamRef.current.video.videoWidth;
       const videoHeight = webcamRef.current.video.videoHeight;
@@ -144,14 +155,25 @@ const AdminInterface = () => {
       canvasCtx.textBaseline = "middle";
       canvasCtx.textAlign = "center";
       
-  
-      if (prevState<=numberKey-1 && prevState>=0 && count===predict_value){
-        const state = prevState +1 
-        canvasCtx.fillText("Hand Gesture: " + labelMap[state].name ,100, 50, 200);
-      }
-      else {
-        canvasCtx.fillText("Hand Gesture: ", 100, 50, 200);
-      }
+
+        if (current==1 || (current == 2 && prevState==numberKey) || (current == 2 && recentPredict == numberKey) ){
+          canvasCtx.fillText("Hand Gesture: " + labelMap[prevPredict+1].name ,100, 50, 200);
+        }
+        else if (current == 2 && prevState!==numberKey && recentPredict!==numberKey){
+          canvasCtx.fillText("Hand Gesture: " + labelMap[prevPredict+1].name + '-' + labelMap[recentPredict+1].name ,100, 50, 200);
+          // recentPredict = numberKey
+        }
+        else if (current == 0  && prevPredict!==0 && countReset!==20){
+            countReset = countReset + 1 
+            canvasCtx.fillText("Hand Gesture: Reset...", 100, 50, 200);
+            if (countReset == 20){
+              prevPredict = 0
+            }
+          }
+        else{
+          canvasCtx.fillText("Hand Gesture: ", 100, 50, 200);
+        }
+        
   
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0){  
         for (const landmarks of results.multiHandLandmarks){
@@ -163,9 +185,38 @@ const AdminInterface = () => {
           }
           const landmark_list = calcLandmarkList(results.image, landmarks)
           const preprocess_landmark = preProcessLandmark(landmark_list)
-          const inputTensor = tf.tensor([preprocess_landmark], [1, preprocess_landmark.length]);
-          const result = await modelHan.predict(inputTensor).data()
-          resultIndex = Array.from(result).indexOf(Math.max(...result));
+          // console.log(preprocess_landmark)
+          // const inputTensor = tf.tensor([preprocess_landmark], [1, preprocess_landmark.length]);
+          const request = {
+            method: 'POST',
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin' : 'origin',
+                'Access-Control-Allow-Headers':'Content-Type, Authorization,X-Api-Key,X-Amz-Security-Token',
+                'Access-Control-Allow-Credentials' : true,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+            },
+            body: JSON.stringify({
+                'data': preprocess_landmark
+            })
+        };
+        
+        try {
+            const response = await fetch(host+'/predict', request);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const responseData = await response.json();
+
+            // console.log(responseData);
+            resultIndex = responseData
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+          // resultIndex = Array.from(result).indexOf(Math.max(...result));
+          // console.log(labelMap[resultIndex+1].name)
         }
       }
       else {
@@ -173,43 +224,68 @@ const AdminInterface = () => {
         count = 0
         prevState = numberKey
         resultIndex = numberKey
+        if (current == 2){
+          recentPredict = numberKey
+        }
       }
   
       if (prevState!== resultIndex){
         status = false
         count = 0 
         prevState = resultIndex
+        if (current == 2){
+          recentPredict = numberKey
+        }
+        // recentPredict = numberKey
     }
       else {
         if (prevState!==numberKey && prevState !== -1 && status===false){
         count = count + 1
-        if (count === predict_value){
+        if (count == predict_value){
           status = true
-            const request = {
-              method: 'POST',
-              statusCode: 200,
-              headers: {
-                  'Access-Control-Allow-Origin' : 'origin',
-                  'Access-Control-Allow-Headers':'Content-Type, Authorization,X-Api-Key,X-Amz-Security-Token',
-                  'Access-Control-Allow-Credentials' : true,
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer '+ sessionStorage.getItem('token')
-          },
-          body: JSON.stringify(labelMap[prevState+1].name)
-        }
-            const response = await fetch(host+'/topic', request)
-                                    .then (response=>{
-                                      if (response.ok){
-                                        // console.log('ok')
-                                      }
-                                      else {
-                                        alert("Log in and retry")
-                                        navigate("/")
-                                      }
-                                    }
-                                    )
-              
+          if (prevState === 0){
+            current = 0
+          }
+          else {
+            if (current == 0 && (prevState == 1 || prevState==2)){
+              current = 1
+              prevPredict = prevState
+            }
+            else if (current == 1 || current == 2)  {
+              if (prevState!=1 && prevState!=2){
+                current = 2
+                recentPredict = prevState
+                const request = {
+                  method: 'POST',
+                  statusCode: 200,
+                  headers: {
+                      'Access-Control-Allow-Origin' : 'origin',
+                      'Access-Control-Allow-Headers':'Content-Type, Authorization,X-Api-Key,X-Amz-Security-Token',
+                      'Access-Control-Allow-Credentials' : true,
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json',
+                      'Authorization': 'Bearer '+ sessionStorage.getItem('token')
+              },
+              body: JSON.stringify(labelMap[prevPredict+1].name + ' - '+ labelMap[recentPredict+1].name)
+            }
+                const response = await fetch(host+'/topic', request)
+                                        .then (response=>{
+                                          if (response.ok){
+                                            // console.log('ok')
+                                          }
+                                          else {
+                                            alert("Log in and retry")
+                                            navigate("/")
+                                          }
+                                        }
+                                        )
+                                        .catch(console.error)
+              }
+              else if (prevState == 1 || prevState == 2){
+                prevPredict = prevState
+              }
+            }
+          }
           }
         }
       }
@@ -256,9 +332,11 @@ const AdminInterface = () => {
         minTrackingConfidence: 0.7
       }); 
       hands.onResults(onResults);
-          if (!modelHan){
-            modelHan = await tf.loadLayersModel('http://localhost:8000/static/tfjsv2/model.json')
-          }
+          // if (!modelHan){
+          //   modelHan = await tf.loadLayersModel('http://localhost:8000/static/tfjsv2/model.json').then(model=>{
+          //     console.log(model)
+          //   })
+          // }
         if (((typeof webcamRef.current !== "undefined" && webcamRef.current !== null)) ){
     
           camera = new cam.Camera(webcamRef.current.video,{
@@ -279,17 +357,15 @@ const AdminInterface = () => {
   let checkin = true
   const [sta,setSta] = useState(true)
   useEffect(()=>{
+    if (checkin){
+      getUSer()
+      checkin = false
+    }
     navigator.getMedia = ( navigator.getUserMedia || navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia || navigator.msGetUserMedia);
       navigator.getMedia({video: true}, function() {
         if (!camera){
           setupCamera()
-      }
-      if (checkin){
-        getUSer()
-      }
-      else {
-        navigate("/")
       }
       }, function() {
         alert("No camera yet. Turn it on")
@@ -319,6 +395,12 @@ const AdminInterface = () => {
                 setSta(false)
                 navigate("..")
               }
+              else {
+                response.json().then((data=>{
+                  setUser(data.user)
+                }))
+                .catch(console.error)
+              }
             })
             .catch((e)=>{
               console.log(e)
@@ -327,14 +409,14 @@ const AdminInterface = () => {
 
 if (sta){
     return (
-  <div className="App bg-image" 
-  style={{
-    backgroundSize: "cover",
-    backgroundImage: `url("https://images.pexels.com/photos/36717/amazing-animal-beautiful-beautifull.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2")`}}>
-    <Header />
-    <div style={{  height: "calc(100vh - 20px)", display: "flex" }}>
-       <Sidebar > 
-         <Menu>
+<div className="App bg-image" 
+style={{
+  backgroundSize: "cover",
+  backgroundImage: `url("https://images.pexels.com/photos/753267/pexels-photo-753267.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2")`}}>
+  <Header />
+  <div style={{  height: "calc(100vh - 20px)", display: "flex" }}>
+     <Sidebar style={{backgroundImage: `url("https://images.pexels.com/photos/1279813/pexels-photo-1279813.jpeg?auto=compress&cs=tinysrgb&w=600")`}} > 
+       <Menu>
            <MenuItem
             icon={<MenuOutlinedIcon />}
             onClick={() => {
@@ -345,9 +427,9 @@ if (sta){
             <h2>Admin</h2>
           </MenuItem>
           <MenuItem icon={<HomeOutlinedIcon />} onClick={()=>navigate('..',{state:'home'})}>Home</MenuItem>
-          <MenuItem icon={<PeopleOutlinedIcon />} onClick={()=>navigate('..',{state:'present'})}>Presentation</MenuItem>
-          <MenuItem icon={<ContactsOutlinedIcon />}>Demo</MenuItem>
-          <MenuItem icon={<ContactsOutlinedIcon />}>Dashboard</MenuItem>
+        <MenuItem icon={<CoPresentIcon />} onClick={()=>navigate('..',{state:'present'})}>Presentation</MenuItem>
+        <MenuItem icon={<VideocamIcon />} onClick={()=>navigate("/admin")}>Demo</MenuItem>
+        <MenuItem icon={<DashboardIcon />} onClick={()=>navigate("/dashboard")}>Dashboard</MenuItem>
           <LogInOut />
         </Menu>
       </Sidebar>
