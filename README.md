@@ -78,8 +78,19 @@ https://song812ads.github.io/DemoWeb
 
 Type of my hand train:
 
-![alt text](anh/image-11.png)
+![alt text](anh/image-21.png)
 
-![alt text](anh/image-12.png)
+![alt text](anh/image-22.png)
 
-![alt text](anh/image-13.png)
+![alt text](anh/image-23.png)
+
+![alt text](anh/image-24.png)
+
+![alt text](anh/image-25.png)
+
+![alt text](anh/image-26.png)
+
+![alt text](anh/image-27.png)
+
+![alt text](anh/image-28.png)
+

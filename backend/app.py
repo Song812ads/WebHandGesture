@@ -152,6 +152,7 @@ def fetch_graph(auth):
 def predict():
     data = request.get_json()
     data = data.get('data')
+    data = np.reshape(data, (1,42))
     # print(data)
     pred = model(data)
     return json.dumps(pred, indent=2, default=int)

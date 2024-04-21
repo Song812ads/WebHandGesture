@@ -41,17 +41,14 @@ const AdminInterface = () => {
     const predict_value = 20
     
     const labelMap = {
-      1:{name:"Reset", color:'red'},
-      2:{name:"Led", color:'yellow'},
-      3:{name:"Sensor", color:'lime'},
-      4:{name:"Off all", color:'blue'},
-      5:{name:"1 On", color:'blue'},
-      6:{name:"2 On", color:'blue'},
-      7:{name:"1 and 2 On", color:'blue'},
-      8:{name:"1 Off", color:'blue'},
-      9:{name:"2 Off", color:'blue'},
-      10:{name:"Get 1 data", color:'blue'},
-      11:{name:"Get 2 data", color:'blue'},
+      1:{name:"Led 1 On", color:'red'},
+      2:{name:"Led 2 On", color:'yellow'},
+      3:{name:"Led 3 On", color:'lime'},
+      4:{name:"Led 1&2 On", color:'blue'},
+      5:{name:"Led 1&3 On", color:'blue'},
+      6:{name:"Led 2&3 On", color:'blue'},
+      7:{name:"Led 1&2&3 On", color:'blue'},
+      8:{name:"Led 1&2&3 Off", color:'blue'},
   }
 
   const numberKey =   Object.keys(labelMap).length;
@@ -156,19 +153,20 @@ const AdminInterface = () => {
       canvasCtx.textAlign = "center";
       
 
-        if (current==1 || (current == 2 && prevState==numberKey) || (current == 2 && recentPredict == numberKey) ){
-          canvasCtx.fillText("Hand Gesture: " + labelMap[prevPredict+1].name ,100, 50, 200);
-        }
-        else if (current == 2 && prevState!==numberKey && recentPredict!==numberKey){
-          canvasCtx.fillText("Hand Gesture: " + labelMap[prevPredict+1].name + '-' + labelMap[recentPredict+1].name ,100, 50, 200);
-          // recentPredict = numberKey
-        }
-        else if (current == 0  && prevPredict!==0 && countReset!==20){
-            countReset = countReset + 1 
-            canvasCtx.fillText("Hand Gesture: Reset...", 100, 50, 200);
-            if (countReset == 20){
-              prevPredict = 0
-            }
+        // if (current==1 || (current == 2 && prevState==numberKey) || (current == 2 && recentPredict == numberKey) ){
+           if (prevState != -1 && prevState != numberKey && count == predict_value){
+          canvasCtx.fillText("Hand Gesture: " + labelMap[prevState+1].name ,100, 50, 200);
+        // }
+        // else if (current == 2 && prevState!==numberKey && recentPredict!==numberKey){
+        //   canvasCtx.fillText("Hand Gesture: " + labelMap[prevPredict+1].name + '-' + labelMap[recentPredict+1].name ,100, 50, 200);
+        //   // recentPredict = numberKey
+        // }
+        // else if (current == 0  && prevPredict!==0 && countReset!==20){
+        //     countReset = countReset + 1 
+        //     canvasCtx.fillText("Hand Gesture: Reset...", 100, 50, 200);
+        //     if (countReset == 20){
+        //       prevPredict = 0
+        //     }
           }
         else{
           canvasCtx.fillText("Hand Gesture: ", 100, 50, 200);
@@ -224,37 +222,26 @@ const AdminInterface = () => {
         count = 0
         prevState = numberKey
         resultIndex = numberKey
-        if (current == 2){
-          recentPredict = numberKey
-        }
+        // if (current == 2){
+        //   recentPredict = numberKey
+        // }
       }
   
       if (prevState!== resultIndex){
-        status = false
         count = 0 
         prevState = resultIndex
-        if (current == 2){
-          recentPredict = numberKey
-        }
+        // if (current == 2){
+        //   recentPredict = numberKey
+        // }
         // recentPredict = numberKey
     }
       else {
-        if (prevState!==numberKey && prevState !== -1 && status===false){
-        count = count + 1
+        if (prevState!==numberKey && prevState !== -1){
+        
         if (count == predict_value){
-          status = true
-          if (prevState === 0){
-            current = 0
-          }
-          else {
-            if (current == 0 && (prevState == 1 || prevState==2)){
-              current = 1
-              prevPredict = prevState
-            }
-            else if (current == 1 || current == 2)  {
-              if (prevState!=1 && prevState!=2){
-                current = 2
-                recentPredict = prevState
+              // if (prevState!=1 && prevState!=2){
+                // current = 2
+                // recentPredict = prevState
                 const request = {
                   method: 'POST',
                   statusCode: 200,
@@ -266,7 +253,7 @@ const AdminInterface = () => {
                       'Content-Type': 'application/json',
                       'Authorization': 'Bearer '+ sessionStorage.getItem('token')
               },
-              body: JSON.stringify(labelMap[prevPredict+1].name + ' - '+ labelMap[recentPredict+1].name)
+              body: JSON.stringify(labelMap[prevState+1].name)
             }
                 const response = await fetch(host+'/topic', request)
                                         .then (response=>{
@@ -281,12 +268,9 @@ const AdminInterface = () => {
                                         )
                                         .catch(console.error)
               }
-              else if (prevState == 1 || prevState == 2){
-                prevPredict = prevState
+              else {
+                count = count+1
               }
-            }
-          }
-          }
         }
       }
       canvasCtx.restore()
