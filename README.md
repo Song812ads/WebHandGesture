@@ -72,6 +72,8 @@ My backend is host on Pythoniseverywhere
 
 Have fun with my project, I will train more and update the type of my train later. Make sure your camera is ready and user/pass in demo topic is demo/demo.
 
+Bàn về các model khi  deploy, với việc chỉ sử dụng kiến trúc mạng đơn giản tfjs hỗ trợ rất tốt cho mô hình có thể depoloy dễ dàng. Điểm yếu của mo hình này là nếu tập dữ liệu không được train cẩn thận từng trường hợp đảm bảo không sai sót thì sẽ khiến cho kết quả performance rất dễ sai. Mô hình Transformer cho ra hiệu suất đáng kinh ngạc khi thật sự có thể giải quyết bài toán dù cho tập dữ liệu có phần hạn hẹp. Tuy nhiên, do tfjs không hỗ trợ Transformer do đó, cần phải gửi dữ liệu liên tục về backend khiến cho trải nghiệm người dùng kém. Do chưa có thời gian train lại kĩ lượng phù hợp với model Classification để người dùng sử dụng mượt mà hơn nên em tạm deploy mô hình Transformer nên hơi lag tí. Mong mọi người thông cảm.
+
 Here is my link project:
 
 https://song812ads.github.io/DemoWeb

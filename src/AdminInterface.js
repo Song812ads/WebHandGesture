@@ -228,6 +228,7 @@ const AdminInterface = () => {
       }
   
       if (prevState!== resultIndex){
+        status = false
         count = 0 
         prevState = resultIndex
         // if (current == 2){
@@ -236,41 +237,47 @@ const AdminInterface = () => {
         // recentPredict = numberKey
     }
       else {
-        if (prevState!==numberKey && prevState !== -1){
+        if (prevState!==numberKey && prevState !== -1 ){
         
-        if (count == predict_value){
-              // if (prevState!=1 && prevState!=2){
-                // current = 2
-                // recentPredict = prevState
-                const request = {
-                  method: 'POST',
-                  statusCode: 200,
-                  headers: {
-                      'Access-Control-Allow-Origin' : 'origin',
-                      'Access-Control-Allow-Headers':'Content-Type, Authorization,X-Api-Key,X-Amz-Security-Token',
-                      'Access-Control-Allow-Credentials' : true,
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/json',
-                      'Authorization': 'Bearer '+ sessionStorage.getItem('token')
-              },
-              body: JSON.stringify(labelMap[prevState+1].name)
+          if (count == predict_value){
+            if (!status){
+              status = true
+                // if (prevState!=1 && prevState!=2){
+                  // current = 2
+                  // recentPredict = prevState
+                  const request = {
+                    method: 'POST',
+                    statusCode: 200,
+                    headers: {
+                        'Access-Control-Allow-Origin' : 'origin',
+                        'Access-Control-Allow-Headers':'Content-Type, Authorization,X-Api-Key,X-Amz-Security-Token',
+                        'Access-Control-Allow-Credentials' : true,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer '+ sessionStorage.getItem('token')
+                },
+                body: JSON.stringify(labelMap[prevState+1].name)
+              }
+                  const response = await fetch(host+'/topic', request)
+                                          .then (response=>{
+                                            if (response.ok){
+                                              // console.log('ok')
+                                            }
+                                            else {
+                                              alert("Log in and retry")
+                                              navigate("/DemoWeb")
+                                            }
+                                          }
+                                          )
+                                          .catch(console.error)
             }
-                const response = await fetch(host+'/topic', request)
-                                        .then (response=>{
-                                          if (response.ok){
-                                            // console.log('ok')
-                                          }
-                                          else {
-                                            alert("Log in and retry")
-                                            navigate("/")
-                                          }
-                                        }
-                                        )
-                                        .catch(console.error)
-              }
-              else {
-                count = count+1
-              }
+  
+                }
+                else {
+                    count = count+1
+                  
+                  
+                }
         }
       }
       canvasCtx.restore()
