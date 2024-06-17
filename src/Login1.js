@@ -10,6 +10,7 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import LogInOut from "./component/LogInOut";
 import VideocamIcon from '@mui/icons-material/Videocam';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
+import SettingsVoiceIcon from '@mui/icons-material/SettingsVoice';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 const Login = () => {
 
@@ -85,7 +86,8 @@ style={{
         </MenuItem>
         <MenuItem icon={<HomeOutlinedIcon />} onClick={()=>navigate('..',{state:'home'})}>Home</MenuItem>
         <MenuItem icon={<CoPresentIcon />} onClick={()=>navigate('..',{state:'present'})}>Presentation</MenuItem>
-        <MenuItem icon={<VideocamIcon />} onClick={()=>navigate("/admin")}>Demo</MenuItem>
+        <MenuItem icon={<VideocamIcon />} onClick={()=>navigate("/admin")}>Webcam Demo</MenuItem>
+        <MenuItem icon={<SettingsVoiceIcon />} onClick={()=>navigate("/voice_text")}>Voice Text Demo</MenuItem>
         <MenuItem icon={<DashboardIcon />} onClick={()=>navigate("/dashboard")}>Dashboard</MenuItem>
         {/* <MenuItem icon={<ReceiptOutlinedIcon /> } onClick={handleLoginClick}>LogIn</MenuItem> */}
         <LogInOut />

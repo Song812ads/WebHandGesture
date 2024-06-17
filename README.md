@@ -16,9 +16,9 @@ This repository is about how Client use hand gesture to communicate with Server 
 The model is based on MediaPipe api which provides way to catch if the hands is exist on frame and extract the position of nodes which will be use to predict after CNN model.
 ![alt text](anh/image-1.png)
 
-The model I use is in model directory. It includes 2 file training model with Neural Network and Transformer. Otherwise, it include pdf about concept I use in this model.
+The model I use is in model directory. It includes 2 file training model with Neural Network and Transformer. I have pdf about this 2 model in model/ directory.
 
-After training model, I used tensorflowjs to convert the model weight and parameter in .h5 file to .json file, and then loaded it to my React app as well the cdn of mediapipe to define nodes.
+After training model, I quantize it using tflite tool then I can use less resource (download tflite not full tensorflow) to host backend
 
 Otherwise, I used some api of React like useRef and WebcamRef to sendFrame when if something change on the frame, used canvas to draw the landmark and box of hand and basic html and react bootstrap to decorate the page.
 
@@ -64,7 +64,7 @@ So that when update, data there will be no conflict on other table and when eras
 
 <b>6. Hosting app </b>
 
-My frontend app is host on Github, which make my url get breakdown if it goes outside the mainpage. 
+My frontend app is host on Vercel
 
 My backend is host on Pythoniseverywhere
 
@@ -72,7 +72,6 @@ My backend is host on Pythoniseverywhere
 
 Have fun with my project, I will train more and update the type of my train later. Make sure your camera is ready and user/pass in demo topic is demo/demo.
 
-Bàn về các model khi  deploy, với việc chỉ sử dụng kiến trúc mạng đơn giản tfjs hỗ trợ rất tốt cho mô hình có thể depoloy dễ dàng. Điểm yếu của mo hình này là nếu tập dữ liệu không được train cẩn thận từng trường hợp đảm bảo không sai sót thì sẽ khiến cho kết quả performance rất dễ sai. Mô hình Transformer cho ra hiệu suất đáng kinh ngạc khi thật sự có thể giải quyết bài toán dù cho tập dữ liệu có phần hạn hẹp. Tuy nhiên, do tfjs không hỗ trợ Transformer do đó, cần phải gửi dữ liệu liên tục về backend khiến cho trải nghiệm người dùng kém. Do chưa có thời gian train lại kĩ lượng phù hợp với model Classification để người dùng sử dụng mượt mà hơn nên em tạm deploy mô hình Transformer nên hơi lag tí. Mong mọi người thông cảm.
 
 Here is my link project:
 

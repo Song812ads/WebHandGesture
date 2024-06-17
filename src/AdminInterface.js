@@ -11,8 +11,7 @@ import { drawConnectors, drawLandmarks} from '@mediapipe/drawing_utils';
 import Header from "./component/Header";
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
-import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
+import SettingsVoiceIcon from '@mui/icons-material/SettingsVoice';
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import LogInOut from "./component/LogInOut";
 import VideocamIcon from '@mui/icons-material/Videocam';
@@ -38,17 +37,18 @@ const AdminInterface = () => {
     let hands
     let count = 0
     let status = false
-    const predict_value = 20
+    const predict_value = 45
     
     const labelMap = {
-      1:{name:"Led 1 On", color:'red'},
-      2:{name:"Led 2 On", color:'yellow'},
-      3:{name:"Led 3 On", color:'lime'},
-      4:{name:"Led 1&2 On", color:'blue'},
-      5:{name:"Led 1&3 On", color:'blue'},
-      6:{name:"Led 2&3 On", color:'blue'},
-      7:{name:"Led 1&2&3 On", color:'blue'},
-      8:{name:"Led 1&2&3 Off", color:'blue'},
+      1:{name:"Led 1&2&3 Off", color:'blue'},
+      2:{name:"Led 1 On", color:'red'},
+      3:{name:"Led 2 On", color:'yellow'},
+      4:{name:"Led 3 On", color:'lime'},
+      5:{name:"Led 1&2 On", color:'blue'},
+      6:{name:"Led 1&3 On", color:'blue'},
+      7:{name:"Led 2&3 On", color:'blue'},
+      8:{name:"Led 1&2&3 On", color:'blue'},
+      
   }
 
   const numberKey =   Object.keys(labelMap).length;
@@ -82,7 +82,7 @@ const AdminInterface = () => {
       // Convert to relative coordinates
       let baseX = 0, baseY = 0;
       tempLandmarkList.forEach((landmarkPoint, index) => {
-        if (index === 0) {
+        if (index == 0) {
           baseX = landmarkPoint[0];
           baseY = landmarkPoint[1];
         }
@@ -126,6 +126,7 @@ const AdminInterface = () => {
     let recentPredict
     let current = 0
     let countReset = 0
+    let hold = 0
     const onResults = async (results)=>{
       const videoWidth = webcamRef.current.video.videoWidth;
       const videoHeight = webcamRef.current.video.videoHeight;
@@ -148,14 +149,60 @@ const AdminInterface = () => {
         canvasElement.height
       )
       canvasCtx.fillStyle = "#000";
-      canvasCtx.font = "50px sans-serif";
+      canvasCtx.font = "300% Arial";
       canvasCtx.textBaseline = "middle";
       canvasCtx.textAlign = "center";
       
 
         // if (current==1 || (current == 2 && prevState==numberKey) || (current == 2 && recentPredict == numberKey) ){
-           if (prevState != -1 && prevState != numberKey && count == predict_value){
-          canvasCtx.fillText("Hand Gesture: " + labelMap[prevState+1].name ,100, 50, 200);
+           if (prevState != -1 && prevState != numberKey){
+          canvasCtx.fillText("Hand Gesture: " + labelMap[prevState+1].name , videoWidth*5.5/20, videoHeight/10,videoHeight*2/3);
+          // if (prevState!==numberKey && prevState !== -1 ){
+        
+          //   // if (count == predict_value){
+          //     if (!status){
+          //       status = true
+          //         // if (prevState!=1 && prevState!=2){
+          //           // current = 2
+          //           // recentPredict = prevState
+
+          //           const request = {
+          //             method: 'POST',
+          //             statusCode: 200,
+          //             headers: {
+          //                 'Access-Control-Allow-Origin' : 'origin',
+          //                 'Access-Control-Allow-Headers':'Content-Type, Authorization,X-Api-Key,X-Amz-Security-Token',
+          //                 'Access-Control-Allow-Credentials' : true,
+          //                 'Accept': 'application/json',
+          //                 'Content-Type': 'application/json',
+          //                 'Authorization': 'Bearer '+ sessionStorage.getItem('token')
+          //         },
+          //         body: JSON.stringify(labelMap[prevState+1].name)
+          //       }
+          //           const response = await fetch(host+'/topic', request)
+          //                                   .then (response=>{
+          //                                     if (response.ok){
+                                          
+          //                                       // console.log('ok')
+          //                                     }
+          //                                     else {
+          //                                       alert("Log in and retry")
+          //                                       navigate("/DemoWeb")
+          //                                     }
+          //                                   }
+          //                                   )
+          //                                   .catch(console.error)
+                                            
+          //     }
+             
+    
+          //         }
+                  // else {
+                  //     count = count+1
+                    
+                    
+                  // }
+          // }
         // }
         // else if (current == 2 && prevState!==numberKey && recentPredict!==numberKey){
         //   canvasCtx.fillText("Hand Gesture: " + labelMap[prevPredict+1].name + '-' + labelMap[recentPredict+1].name ,100, 50, 200);
@@ -169,117 +216,84 @@ const AdminInterface = () => {
         //     }
           }
         else{
-          canvasCtx.fillText("Hand Gesture: ", 100, 50, 200);
+          // count = count + 1
+          canvasCtx.fillText("Hand Gesture: ", videoWidth*2.2/10, videoHeight/10,videoHeight/2);
         }
         
   
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0){  
         for (const landmarks of results.multiHandLandmarks){
-          if (count === predict_value){
+          // if (count === predict_value){
             drawBoundingBox(landmarks, videoWidth, videoHeight)
             drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
               {color: '#00FF00', lineWidth: 5});
             drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 2});
-          }
-          const landmark_list = calcLandmarkList(results.image, landmarks)
-          const preprocess_landmark = preProcessLandmark(landmark_list)
-          // console.log(preprocess_landmark)
-          // const inputTensor = tf.tensor([preprocess_landmark], [1, preprocess_landmark.length]);
-          const request = {
-            method: 'POST',
-            statusCode: 200,
-            headers: {
-                'Access-Control-Allow-Origin' : 'origin',
-                'Access-Control-Allow-Headers':'Content-Type, Authorization,X-Api-Key,X-Amz-Security-Token',
-                'Access-Control-Allow-Credentials' : true,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
-            },
-            body: JSON.stringify({
-                'data': preprocess_landmark
-            })
-        };
-        
-        try {
-            const response = await fetch(host+'/predict', request);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+          // }
+            if (hold == predict_value ){
+              const landmark_list = calcLandmarkList(results.image, landmarks)
+              const preprocess_landmark = preProcessLandmark(landmark_list)
+              // hold = 0
+              const request = {
+                method: 'POST',
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin' : 'origin',
+                    'Access-Control-Allow-Headers':'Content-Type, Authorization,X-Api-Key,X-Amz-Security-Token',
+                    'Access-Control-Allow-Credentials' : true,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    'data': preprocess_landmark
+                })
+            };
+            
+            try {
+                const response = await fetch(host+'/predict', request);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const responseData = await response.json();
+                prevState = responseData
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            // }
             }
-            const responseData = await response.json();
-
-            // console.log(responseData);
-            resultIndex = responseData
-        } catch (error) {
-            console.error('There was a problem with the fetch operation:', error);
-        }
+            hold = 0
+          }
+          else {
+            if (hold>predict_value){
+              hold = hold
+            }
+            else {
+              hold = hold+1
+            }
+            
+          }
+            }  
           // resultIndex = Array.from(result).indexOf(Math.max(...result));
           // console.log(labelMap[resultIndex+1].name)
-        }
       }
       else {
         status = false
         count = 0
         prevState = numberKey
         resultIndex = numberKey
-        // if (current == 2){
-        //   recentPredict = numberKey
-        // }
+        hold = 0
       }
   
-      if (prevState!== resultIndex){
-        status = false
-        count = 0 
-        prevState = resultIndex
-        // if (current == 2){
-        //   recentPredict = numberKey
-        // }
-        // recentPredict = numberKey
-    }
-      else {
-        if (prevState!==numberKey && prevState !== -1 ){
-        
-          if (count == predict_value){
-            if (!status){
-              status = true
-                // if (prevState!=1 && prevState!=2){
-                  // current = 2
-                  // recentPredict = prevState
-                  const request = {
-                    method: 'POST',
-                    statusCode: 200,
-                    headers: {
-                        'Access-Control-Allow-Origin' : 'origin',
-                        'Access-Control-Allow-Headers':'Content-Type, Authorization,X-Api-Key,X-Amz-Security-Token',
-                        'Access-Control-Allow-Credentials' : true,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer '+ sessionStorage.getItem('token')
-                },
-                body: JSON.stringify(labelMap[prevState+1].name)
-              }
-                  const response = await fetch(host+'/topic', request)
-                                          .then (response=>{
-                                            if (response.ok){
-                                              // console.log('ok')
-                                            }
-                                            else {
-                                              alert("Log in and retry")
-                                              navigate("/DemoWeb")
-                                            }
-                                          }
-                                          )
-                                          .catch(console.error)
-            }
-  
-                }
-                else {
-                    count = count+1
-                  
-                  
-                }
-        }
-      }
+    //   if (prevState != resultIndex){
+    //     status = false
+    //     count = 0 
+    //     prevState = resultIndex
+    //     // hold = 0
+    //     // if (current == 2){
+    //     //   recentPredict = numberKey
+    //     // }
+    //     // recentPredict = numberKey
+    // }
+
       canvasCtx.restore()
     }
   
@@ -419,7 +433,8 @@ style={{
           </MenuItem>
           <MenuItem icon={<HomeOutlinedIcon />} onClick={()=>navigate('..',{state:'home'})}>Home</MenuItem>
         <MenuItem icon={<CoPresentIcon />} onClick={()=>navigate('..',{state:'present'})}>Presentation</MenuItem>
-        <MenuItem icon={<VideocamIcon />} onClick={()=>navigate("/admin")}>Demo</MenuItem>
+        <MenuItem icon={<VideocamIcon />} onClick={()=>navigate("/admin")}>Webcam Demo</MenuItem>
+        <MenuItem icon={<SettingsVoiceIcon />} onClick={()=>navigate("/voice_text")}>Voice Text Demo</MenuItem>
         <MenuItem icon={<DashboardIcon />} onClick={()=>navigate("/dashboard")}>Dashboard</MenuItem>
           <LogInOut />
         </Menu>
@@ -438,8 +453,9 @@ style={{
             right: 0,
             textAlign: "center",
             zIndex: 9,
-            width: 800,
-            height: 540,
+            width: '60%',
+            height: '80%',
+            objectFit: 'cover'
           }}
         />
         <canvas
@@ -453,8 +469,8 @@ style={{
             right: 0,
             textAlign: "center",
             zIndex: 9,
-            width: 800,
-            height: 540,
+            width: '60%',
+            height: '80%',
           }}
         />
         </div>

@@ -14,6 +14,17 @@ app.config['SECRET_KEY'] = 'nhungngay0em'
 cors = CORS(app, origins='*', X_Content_Type_Options= 'nosniff')
 client = MQTTClient('user_web')
 
+labelNames = [
+    "Led 1&2&3 Off",
+    "Led 1 On",
+    "Led 2 On",
+    "Led 3 On",
+    "Led 1&2 On",
+    "Led 1&3 On",
+    "Led 2&3 On",
+    "Led 1&2&3 On"
+]
+
 path = 'D:/contiki/doan/web_AI/hand-gesture/model'
 class KeyPointClassifier(object):
     def __init__(
@@ -79,8 +90,8 @@ def topic_handle(auth):
             return jsonify({'error': 'MQTT client not initialized'}), 500
         else:
             client.pub('/t1',data)
-            client.pub('/t1','ok')
-    return jsonify({'message': 'JSON data received'}), 200
+            # client.pub('/t1','ok')
+    return '', 200
 #'D:/contiki/doan/web_AI/my-app/src/static/tfjsv2/group1-shard1of1.bin'
 @app.route('/static/tfjsv2/model.json')
 def serve_model():
@@ -149,12 +160,18 @@ def fetch_graph(auth):
     return jsonify(response)
 
 @app.route('/predict', methods=['POST'])
-def predict():
+@token_required
+def predict(auth):
     data = request.get_json()
     data = data.get('data')
     data = np.reshape(data, (1,42))
     # print(data)
     pred = model(data)
+    if auth == 'song':
+        if client is None:
+            return jsonify({'error': 'MQTT client not initialized'}), 500
+        else:
+            client.pub('/t1',str(pred))
     return json.dumps(pred, indent=2, default=int)
 
 

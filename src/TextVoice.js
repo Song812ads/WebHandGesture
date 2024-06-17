@@ -10,8 +10,9 @@ import CoPresentIcon from '@mui/icons-material/CoPresent';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import DefaultPage from "./component/DefaultPage";
-import LogInOut from "./component/LogInOut";
 import SettingsVoiceIcon from '@mui/icons-material/SettingsVoice';
+import Recorder from './component/Recorder'
+import LogInOut from "./component/LogInOut";
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,6 +30,12 @@ useEffect(()=>{
     check = false
   }
 },[])
+
+    const [selectedOption, setSelectedOption] = useState(null);
+  
+    const handleChange = (event) => {
+      setSelectedOption(event.target.value);
+    };
 
   return (
 <div className="App bg-image" 
@@ -57,7 +64,22 @@ style={{
         <LogInOut />
       </Menu>
     </Sidebar>
-      <DefaultPage type={page} />
+    <div style={{ flex: 1 }}>
+    <div className="audio-recorder-container py-5 h-100 d-flex justify-content-center align-items-center">
+        <div className="max-w-sm border py-4 px-6 bg-black" style={{ width: '50vw' }}>
+            <h2 className="text-white text-center mb-4">Audio Recorder</h2>
+            <div className="form-check form-check-inline mb-3">
+                <input className="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" defaultChecked />
+                <label className="form-check-label text-white" htmlFor="inlineRadio1">Text</label>
+            </div>
+            <div className="form-check form-check-inline">
+                <input className="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2" />
+                <label className="form-check-label text-white" htmlFor="inlineRadio2">Voice</label>
+            </div>
+            <Recorder />
+        </div>
+    </div>
+</div>
    </div>
    <Header />
  </div>

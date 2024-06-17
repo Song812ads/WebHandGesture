@@ -12,7 +12,7 @@ import LogInOut from "./component/LogInOut";
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import DrawGraph from './component/DrawGraph';
 import { getListSubheaderUtilityClass } from '@mui/material';
-
+import SettingsVoiceIcon from '@mui/icons-material/SettingsVoice';
 
 
 
@@ -89,7 +89,8 @@ const Dashboard = () => {
                 </MenuItem>
                 <MenuItem icon={<HomeOutlinedIcon />} onClick={()=>navigate('..',{state:'home'})}>Home</MenuItem>
                 <MenuItem icon={<CoPresentIcon />} onClick={()=>navigate('..',{state:'present'})}>Presentation</MenuItem>
-                <MenuItem icon={<VideocamIcon />} onClick={()=>navigate("/admin")}>Demo</MenuItem>
+                <MenuItem icon={<VideocamIcon />} onClick={()=>navigate("/admin")}>Webcam Demo</MenuItem>
+                <MenuItem icon={<SettingsVoiceIcon />} onClick={()=>navigate("/voice_text")}>Voice Text Demo</MenuItem>
                 <MenuItem icon={<DashboardIcon />} onClick={()=>navigate("/dashboard")}>Dashboard</MenuItem>
                 {/* <MenuItem icon={<ReceiptOutlinedIcon /> } onClick={handleLoginClick}>LogIn</MenuItem> */}
                 <LogInOut />

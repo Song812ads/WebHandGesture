@@ -8,6 +8,7 @@ import {ProSidebarProvider}  from 'react-pro-sidebar';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminInterface from './AdminInterface';
 import Login from './Login1';
+import TextVoice from './TextVoice'
 import Dashboard from './Dashboard';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -43,6 +44,14 @@ root.render(
                 <OpenCvProvider>
                     <ProSidebarProvider>
                         <Dashboard />
+                    </ProSidebarProvider>
+                </OpenCvProvider>
+            }>
+            </Route>
+            <Route path="/voice_text" element={
+                <OpenCvProvider>
+                    <ProSidebarProvider>
+                        <TextVoice/>
                     </ProSidebarProvider>
                 </OpenCvProvider>
             }>
